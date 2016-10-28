@@ -1,0 +1,11 @@
+#! /bin/sh
+#Faito-2015
+#Keep 100 last lines of the log file.
+
+logfile=$1
+counter=$(wc -l $logfile | awk '{print $1}')
+[ $counter -gt 100 ] && {
+	/usr/bin/tail -n 100  $logfile > /tmp/tmplogfile
+	mv -f /tmp/tmplogfile $logfile
+}    
+    

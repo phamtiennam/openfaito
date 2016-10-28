@@ -1,0 +1,42 @@
+#!/bin/sh
+#Faito-2015,by NamPham
+#Trigger this script after receiving DHCP Option 43 from DHCP server.
+
+local a=$(cat /tmp/dhcp43)
+local b=$(uci get -q network.lan.vendorid)
+
+if [ "$(echo ${a//,/ }|awk '{split($1,tmp,":");print tmp[2]}')" == "" ]; then 
+  echo ${a//,/ }|awk 'BEGIN {RS = " "};{print $0}'|grep -w $b > /tmp/tmpdhcp43
+else
+  echo ${a//,/ }| awk '{print $3}' > /tmp/tmpdhcp43
+fi  
+
+local APcIP=$(awk '{FS=":";print $1}' /tmp/tmpdhcp43)
+local Vendor=$(awk '{FS=":";print $2}'/tmp/tmpdhcp43)
+
+[ "$(uci get -q network.lan.vendorid)" != "$Vendor" ]&& {
+        echo "$(date): [DHCP43] Not matching verdor class" >> /etc/APlog
+        exit 0  
+}
+[ "$(lua /sbin/validatingIP $APcIP)" == "0" ] && {
+        echo "$(date): [DHCP43] Invalid APc IP address" >> /etc/APlog
+        exit 0 
+}
+
+[ $(uci get -q default.settings.APcontroller) == $APcIP -a $(uci get -q network.avlan3316.server) == $APcIP ] && exit 0
+
+#chap use name & password of l2tp server
+uci set default.settings.APcontroller="$APcIP" 
+username=$(uci -q get default.settings.chap_username)
+[ "$username" == "" ]&& uci set default.settings.chap_username=l2tpv3
+secret=$(uci -q get default.settings.chap_secret)
+[ "$secret" == "" ]&& uci set default.settings.chap_secret=abcd12345
+uci commit default
+
+#update network
+sh /lib/faito/init.d.default br-lan
+/etc/init.d/network restart
+
+#Log 
+echo "$(date): [DHCP43] Received APc IP $APcIP" >> /etc/APlog
+rm -f /tmp/tmpdhcp43

@@ -1,0 +1,35 @@
+#!/bin/sh
+#FAITO-2014,NamPham
+
+wfx=$1
+
+#reorder ssid 2
+
+ssid2=$(uci show wireless| awk "/id_ssid=$wfx/"'{++i;tmp[i]=$0} END {print tmp[2]}')
+cur2=$(echo ${ssid2#*=})
+[ ${cur2} != "${wfx}_2" ] &&{
+
+  #num2=$(echo $ssid2 |awk '{FS="[";print $2}'|awk '{FS="]";print $1}')
+  num2=$(echo ${ssid2#*\[}|awk '{FS="]";print $1}')
+  let "num2+=1"
+
+  #path2=$(uci show wireless| grep id_ssid=$wfx | grep -w id_ssid=${wfx}_2|awk '{FS=".";OFS=".";print $1,$2}')
+  path2=$(uci show wireless |awk "/id_ssid=${wfx}_2/"'{FS=".";OFS=".";print $1,$2}')
+  /sbin/uci reorder ${path2}=${num2}
+}
+
+#reorder ssid 3
+
+ssid3=$(uci show wireless|awk "/id_ssid=$wfx/"'{++i;tmp[i]=$0} END {print tmp[3]}')
+cur3=$(echo ${ssid3#*=})
+[ ${cur3} != "${wfx}_3" ] &&{
+
+  #num3=$(echo $ssid3 |awk '{FS="[";print $2}'|awk '{FS="]";print $1}')
+  num3=$(echo ${ssid3#*\[}|awk '{FS="]";print $1}')
+  let "num3+=1"
+
+  #path3=$(uci show wireless| grep id_ssid=$wfx | grep -w id_ssid=${wfx}_3|awk '{FS=".";OFS=".";print $1,$2}')
+  path3=$(uci show wireless |awk "/id_ssid=${wfx}_3/"'{FS=".";OFS=".";print $1,$2}')
+  /sbin/uci reorder ${path3}=${num3}
+}
+uci commit wireless

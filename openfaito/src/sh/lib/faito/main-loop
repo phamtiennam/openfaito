@@ -1,0 +1,54 @@
+#!/bin/sh
+#Author:NamPham
+#Date:10.29.2013
+#Purpose:The loop check the status of AP every 2 seconds
+#$%^-^%
+        while true
+        do      
+                
+                [ "$(uci -q get apc.setting.apc_request)" == "1" ]&& {
+                        uci set apc.setting.apc_request=0
+                        uci commit apc
+                    #update new users first
+			/lib/faito/update_user.sh
+                    #entire data
+                        /lib/faito/update_settings_nodes.sh allUd
+
+                }
+
+                [ "$(uci -q get apc.setting.apc_request)" == "2" ]&& {
+                        uci set apc.setting.apc_request=0
+                        uci commit apc
+                    #update new users first
+			/lib/faito/update_user.sh
+                    #ud only users data 
+                        /lib/faito/update_settings_nodes.sh userUd
+
+                }
+
+
+                [ "$(uci -q get apc.setting.initusers)" == "1" ]&& {
+                         uci set apc.setting.initusers=0
+                         uci commit apc
+                         rm -rf /tmp/user_mac_current /tmp/user_mac_gone /tmp/user_mac_last /tmp/user_mac_new
+                         /lib/faito/update_user.sh
+                }         
+
+		 
+		[ "$(uci -q get apc.setting.ApplyNewSettings )" == "1" ] && /lib/faito/apply_new_settings.sh newsets
+		[ "$(uci -q get apc.setting.discovery)" == "1" ]&& /lib/faito/update_settings_nodes.sh  discovery		
+		[ "$(uci -q get apc.setting.FTP_flag)" == "1" ]&&  /lib/faito/update_settings_nodes.sh  upgrade	
+		[ "$(uci -q get apc.setting.FTP_download_flag)" == "1" ]&& /lib/faito/update_settings_nodes.sh  downloadfw	
+		[ "$(uci -q get apc.setting.FTP_upgrade_flag)" == "1" ]&& /lib/faito/update_settings_nodes.sh  applyfw	
+		[ "$(uci -q get apc.setting.ImmediateUd)" == "1" ]&& /lib/faito/update_current_settings.sh
+		[ "$(uci -q get apc.setting.FTP_just_upgraded)" == "1" ]&& /lib/faito/rc.local
+		[ "$(uci -q get apc.setting.hotspotKick)" == "1" ]&& /lib/faito/kickuser.sh
+
+                [ "$(uci -q get apc.setting.wifi_updown)" == "1" ]&& {
+                          /sbin/vap2ath.sh
+                          #echo "$(date): wifi restarted" >> /etc/APlog 
+                }
+
+		sleep 5
+	done
+

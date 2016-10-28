@@ -1,0 +1,17 @@
+#!/bin/sh
+left=$4
+right=$5
+interface="l2tp-avlan3316"
+[ "$1" = "$interface" ]&& {
+/usr/sbin/ipsec stop
+uci set strongswan.ipsec_config_L2TP_IPSEC.left=$left
+uci set strongswan.ipsec_config_L2TP_IPSEC.right=$right
+uci commit strongswan
+/etc/init.d/strongswan start
+#Register  device to APc Nagios
+/sbin/setdefault apc=$right &
+#Device check-in for the first time
+sleep 5
+/lib/faito/update_settings_nodes.sh 1minuteUd &
+}
+

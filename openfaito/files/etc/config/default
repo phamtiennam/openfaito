@@ -1,0 +1,8 @@
+config default settings
+	option APcontroller	'192.168.0.2'
+	option apc_name	'apc'
+	option apc_path	'/var/www/html'
+	option apc_snmp_user_name 'admin'
+	option apc_snmp_pass1	'apc0ntr0ll3r'
+	option apc_snmp_pass2	'apc0ntr0ll3r'
+	

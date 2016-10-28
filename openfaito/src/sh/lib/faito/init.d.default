@@ -1,0 +1,13 @@
+#!/bin/sh 
+#Faito-2014,NamPham
+iface=$1
+[ "$iface" == "" ]&&iface=$(route |awk '/default/{print $8}'|head -1)
+uci set network.avlan3316=interface
+uci set network.avlan3316.ifname=${iface}.3316
+uci set network.avlan3316.proto=l2tp
+uci set network.avlan3316.encap=udp
+uci set network.avlan3316.defaultroute=0
+uci set network.avlan3316.server=$(uci get -q default.settings.APcontroller)
+uci set network.avlan3316.username=$(uci get -q default.settings.chap_username)
+uci set network.avlan3316.password=$(uci get -q default.settings.chap_secret)
+uci commit network

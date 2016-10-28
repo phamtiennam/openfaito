@@ -1,0 +1,45 @@
+#/bin/sh
+#FAITO-2013,NamPham
+echo $* |awk 'BEGIN { RS = " " };{print $0}'|tr '=' ' ' > /tmp/setdefault
+
+
+while read riga;do
+	a=$(echo $riga|awk '{print $1}')
+	b=$(echo $riga|awk '{print $2}')
+	case $a in 
+		APC|apc)
+			oid=1.3.6.1.4.1.426.8.1.20.6.1.1.0
+			path_of_apc="$(uci get default.settings.apc_path)/$(uci get default.settings.apc_name)"
+			apc_snmp_user_name=$(uci get default.settings.apc_snmp_user_name)
+			apc_snmp_pass1=$(uci get default.settings.apc_snmp_pass1)
+			apc_snmp_pass2=$(uci get default.settings.apc_snmp_pass2)
+			ipl2tp=$(ifconfig l2tp-avlan3316| grep "inet\ addr"|awk '{print $2}'|tr -d "addr:")
+			optionsnmp="-t 5 -v3 -u $apc_snmp_user_name -a MD5 -A $apc_snmp_pass1 -x DES -X $apc_snmp_pass2 -l authPriv"
+
+			
+	  	    #commit /etc/config/default
+			uci set default.settings.l2tpserver=${b}
+			uci commit default
+			
+			
+		    #Restarting xinetd
+			# echo "L2TP Server IP:${b}"
+			#c=$(grep  -w "only_from" /etc/xinetd.d/nrpe )
+			#sed -i "s/${c}/        only_from       = ${b}/g" /etc/xinetd.d/nrpe
+			#echo "Restarting xinetd..."
+			#pidof_nrpe=$(pidof nrpe)
+			#[ "$pidof_nrpe" != "" ] && kill -9 $pidof_nrpe	
+			#/etc/init.d/xinetd restart 
+			
+		    #Registering IP address to Nagios of new APC
+		    #	echo "Registering IP address to Nagios of APC..."
+		    #	[[ ! -z ${ipl2tp} ]]&& {
+		    #		$(/bin/ping -c 1 $b > /dev/null)
+		    #		[ $? == 0 ] && snmpset ${optionsnmp} ${b} ${oid} s "/lib/faito_apc/update_listIP_nagios.php \"input=${ipl2tp}&action=add\""
+		    #	}
+		    #Switch off Flag WatchDogUser
+		    	uci set apc.setting.WatchDogUser=0
+		    	uci commit apc	
+				;;
+	esac	
+done < /tmp/setdefault

@@ -1,0 +1,12 @@
+#!/bin/sh
+#FAITO-2014
+
+uci show id_ssid| grep =on| awk '{FS="=";print $1}'|awk '{FS=".";print $3}' > /tmp/checkssid
+uci show id_ssid| grep =off| awk '{FS="=";print $1}'|awk '{FS=".";print $3}' >> /tmp/checkssid
+
+while read riga ;do
+	[ "$riga" != "" -a "$(uci show wireless| grep -w "id_ssid=$riga")" == "" ]&& {
+			uci set id_ssid.status.${riga}=na
+			uci commit id_ssid
+	}		
+done < /tmp/checkssid

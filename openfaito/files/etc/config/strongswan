@@ -1,0 +1,18 @@
+config service 'main'
+        option enable '0'
+
+config setting 'ipsec_secrets'
+	option psk 'abcd123456789'
+
+config setting 'ipsec_config_L2TP_IPSEC'
+	option ikelifetime '60m'
+	option keylife '20m'
+	option rekeymargin '3m'
+	option keyingtries '1'
+	option keyexchange 'ikev2'
+	option authby 'secret'
+	option auto 'start'
+	option left '%any'
+	option right '182.168.1.1'
+	option leftfirewall 'yes'
+

@@ -1,0 +1,7 @@
+#!/bin/sh
+interface=l2tp-avlan3316
+[ "$1" = "$interface" ]&& {
+/usr/sbin/ipsec stop
+
+}
+

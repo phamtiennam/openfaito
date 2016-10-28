@@ -1,0 +1,15 @@
+#!/bin/sh
+#FAITO-2013
+/lib/faito/delete_ssid 
+a=$1
+[ "$(uci show wireless | grep -w "device=${a}")" == "" ] && 
+				{
+				echo ${a}_1
+                                uci set id_ssid.status.${a}_1=on;uci commit id_ssid
+				exit
+				}
+
+c=$(uci show id_ssid | grep $a|grep =na|head -1|awk '{FS=".";print $3}'|awk '{FS="=";print $1}')
+[ "$c" != "" ]&& uci set id_ssid.status.$c=on;uci commit id_ssid
+echo "$c"
+

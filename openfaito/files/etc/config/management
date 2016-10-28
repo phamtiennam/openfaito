@@ -1,0 +1,7 @@
+config management enable
+	option FlagGetSettings	0
+	option AllowAPController 0
+	option 1minuteUd 0
+	option discovery 0
+	option rescuel2tp 1
+	option snmptrapd 0

@@ -1,0 +1,16 @@
+#!/bin/sh
+#Faito-2015,by NamPham
+#Check PowerUp or Rebooted event.
+
+[ -f /etc/kmsglog ] || touch /etc/kmsglog
+[ -f /etc/APlog ]|| touch /etc/APlog
+
+a=$(grep -w "entered disabled state" /etc/kmsglog)
+[ "$a" == "" ]&& echo "-- -- -- ------ -- ----: Power-Up Event" >> /etc/APlog || echo "$(date): Rebooted Event" >> /etc/APlog
+echo "" > /etc/kmsglog
+
+while true
+do 
+	cat /proc/kmsg > /etc/kmsglog
+	sleep 5
+done 
